@@ -132,4 +132,3 @@ class _AstrologyTrinityDrawScreenState extends State<AstrologyTrinityDrawScreen>
     );
   }
 }
-

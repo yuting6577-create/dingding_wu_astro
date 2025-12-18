@@ -84,9 +84,9 @@ class _TarotDailyScreenState extends State<TarotDailyScreen> {
                                   const SizedBox(height: 8),
                                   Text(displayText),
                                   const SizedBox(height: 12),
-                                  Text('愛情建議: ${card['love_zh'] ?? 'N/A'}'),
-                                  Text('事業建議: ${card['career_zh'] ?? 'N/A'}'),
-                                  Text('財務建議: ${card['finance_zh'] ?? 'N/A'}'),
+                                  Text('愛情建議: ${card['love'] ?? 'N/A'}'),
+                                  Text('事業建議: ${card['career'] ?? 'N/A'}'),
+                                  Text('財務建議: ${card['finance'] ?? 'N/A'}'),
                                 ],
                               ),
                             ),
@@ -98,35 +98,18 @@ class _TarotDailyScreenState extends State<TarotDailyScreen> {
                      padding: const EdgeInsets.all(8.0),
                      child: ElevatedButton(onPressed: _drawCards, child: const Text('重新抽牌')),
                    ),
-                  _buildSeasonSpreadBanner(context),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        minimumSize: const Size(double.infinity, 50), // Make button wider
+                      ),
+                      onPressed: () => context.go('/season-spread'),
+                      child: const Text('探索年度稀缺：四季牌陣指引'),
+                    ),
+                  )
                 ],
               ),
-    );
-  }
-
-  Widget _buildSeasonSpreadBanner(BuildContext context) {
-    return GestureDetector(
-      onTap: () => context.go('/season-spread'),
-      child: Card(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.wb_sunny, size: 40),
-              const SizedBox(width: 16),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('探索更深層的指引', style: Theme.of(context).textTheme.bodyText1),
-                  Text('試試「四季牌陣」深度解析', style: Theme.of(context).textTheme.headline6),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
