@@ -4,6 +4,8 @@
     pkgs.flutter
     pkgs.dart
     pkgs.cmake
+    pkgs.ninja
+    pkgs.google-chrome
   ];
 
   # Enable Flutter support in the IDE by adding the VS Code extension.

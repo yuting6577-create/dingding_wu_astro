@@ -1,50 +1,84 @@
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:share_plus/share_plus.dart';
 
 // 1. 定義 TestModel
 class TestModel {
+  final String category;
   final String question;
-  final List<String> options;
-  final List<String> results;
+  final List<dynamic> options;
+  final List<dynamic> results;
 
-  TestModel({required this.question, required this.options, required this.results})
-      : assert(options.length == 4 && results.length == 4);
+  TestModel({
+    required this.category,
+    required this.question,
+    required this.options,
+    required this.results,
+  });
+
+  factory TestModel.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return TestModel(
+      category: data['category'] ?? '',
+      question: data['question'] ?? '',
+      options: data['options'] ?? [],
+      results: data['results'] ?? [],
+    );
+  }
 }
 
-class PsychTestListScreen extends StatefulWidget {
+class PsychTestListScreen extends StatelessWidget {
   const PsychTestListScreen({super.key});
 
   @override
-  State<PsychTestListScreen> createState() => _PsychTestListScreenState();
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('心理測驗'),
+      ),
+      body: StreamBuilder<QuerySnapshot>(
+        stream: FirebaseFirestore.instance.collection('psych_tests').orderBy('number').snapshots(),
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return Center(child: Text('錯誤：${snapshot.error}'));
+          }
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          final tests = snapshot.data!.docs.map((doc) => TestModel.fromFirestore(doc)).toList();
+
+          return PageView.builder(
+            itemCount: tests.length,
+            itemBuilder: (context, index) {
+              return PsychTestPage(test: tests[index]);
+            },
+          );
+        },
+      ),
+    );
+  }
 }
 
-class _PsychTestListScreenState extends State<PsychTestListScreen> {
-  // 2. 建立 TestModel 實例 (未來可以從 Firestore 載入)
-  final TestModel _currentTest = TestModel(
-    question: '你覺得哪種情況最讓你感到焦慮？',
-    options: [
-      '公開演講',
-      '參加一個全是陌生人的派對',
-      '重要的考試或面試',
-      '對未來的規劃感到迷惘',
-    ],
-    results: [
-      '結果A：你傾向於過度思考，試著活在當下。',
-      '結果B：你重視人際關係，但有時會感到社交壓力。',
-      '結果C：你追求完美，對自己有很高的要求。',
-      '結果D：你渴望穩定，但也要學會擁抱不確定性。',
-    ],
-  );
+class PsychTestPage extends StatefulWidget {
+  final TestModel test;
 
+  const PsychTestPage({super.key, required this.test});
+
+  @override
+  _PsychTestPageState createState() => _PsychTestPageState();
+}
+
+class _PsychTestPageState extends State<PsychTestPage> {
   String? _resultText;
 
   void _handleOptionPressed(int index) {
     setState(() {
-      _resultText = _currentTest.results[index];
+      _resultText = widget.test.results[index];
     });
   }
-  // 3. 實現分享功能
+
   void _shareResult() {
     if (_resultText != null) {
       Share.share('我在「鼎鼎無名的占卜小館」的心理測驗結果是：$_resultText');
@@ -53,61 +87,53 @@ class _PsychTestListScreenState extends State<PsychTestListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('心理測驗'),
-        actions: [
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            widget.test.category,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            widget.test.question,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 20),
+          ...List.generate(
+            widget.test.options.length,
+            (index) => ElevatedButton(
+              onPressed: () => _handleOptionPressed(index),
+              child: Text(widget.test.options[index].toString()),
+            ),
+          ),
+          const SizedBox(height: 30),
           if (_resultText != null)
-            IconButton(
-              icon: const Icon(Icons.share),
-              onPressed: _shareResult,
-              tooltip: '分享結果',
-            )
-        ],
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              _currentTest.question,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 20),
-            // 使用 ListView.builder 動態生成按鈕
-            ...List.generate(
-              _currentTest.options.length,
-              (index) => ElevatedButton(
-                onPressed: () => _handleOptionPressed(index),
-                child: Text(_currentTest.options[index]),
-              ),
-            ),
-            const SizedBox(height: 30),
-            if (_resultText != null)
-              Card(
-                color: Theme.of(context).colorScheme.secondaryContainer,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      Text(
-                        _resultText!,
-                        style: const TextStyle(fontSize: 18),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 10),
-                      IconButton(
-                        icon: const Icon(Icons.share),
-                        onPressed: _shareResult,
-                        tooltip: '分享結果',
-                      )
-                    ],
-                  ),
+            Card(
+              color: Theme.of(context).colorScheme.secondaryContainer,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      _resultText!,
+                      style: const TextStyle(fontSize: 18),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 10),
+                    IconButton(
+                      icon: const Icon(Icons.share),
+                      onPressed: _shareResult,
+                      tooltip: '分享結果',
+                    )
+                  ],
                 ),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }
