@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "827247802510",
+    "project_id": "dingding-tarot-77424",
+    "storage_bucket": "dingding-tarot-77424.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827247802510:android:ee25dfce3c5c0cc37871df",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjORmQmRlLxXXZp6pfm96TR_Vycbbo1lM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:827247802510:android:fa064ac7e6550a187871df",
+        "android_client_info": {
+          "package_name": "com.m"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDjORmQmRlLxXXZp6pfm96TR_Vycbbo1lM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
